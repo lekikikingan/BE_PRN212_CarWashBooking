@@ -1,0 +1,36 @@
+# ===== Build artifacts =====
+**/bin/
+**/obj/
+[Bb]in/
+[Oo]bj/
+**/wwwroot/
+
+# ===== IDE / editor =====
+**/.vs/
+**/.vscode/
+**/.idea/
+*.user
+*.suo
+
+# ===== Secrets / local config =====
+**/appsettings.json
+**/appsettings.Development.json
+!**/appsettings.example.json
+
+# ===== SDK cá nhân =====
+global.json
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== AI tooling (KHONG push) =====
+.claude/
+**/.claude/
+**/settings.local.json
+.cursor/
+.github/copilot-*
+
+# ===== Markdown docs (KHONG push) =====
+*.md
+**/*.md
