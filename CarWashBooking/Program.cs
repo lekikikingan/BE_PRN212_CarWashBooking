@@ -9,6 +9,17 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<CarWashDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Cookie-based session authentication (không dùng JWT)
+// SessionId được lưu trong cookie, validate qua bảng Sessions trong DB
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/api/auth/login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    });
+
+builder.Services.AddAuthorization();
+
 // Đăng ký service layer — team implement logic vào các class tương ứng trong Services/
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
@@ -24,6 +35,9 @@ if (app.Environment.IsDevelopment())
 {
     await DbInitializer.SeedAsync(app.Services);
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

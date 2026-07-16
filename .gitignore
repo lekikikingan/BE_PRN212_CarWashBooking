@@ -34,3 +34,10 @@ Thumbs.db
 # ===== Markdown docs (KHONG push) =====
 *.md
 **/*.md
+
+# ===== Word / Office docs (KHONG push) =====
+*.docx
+*.doc
+*.xlsx
+*.pptx
+*.txt
