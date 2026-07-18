@@ -15,7 +15,6 @@ public class ServicePackageService : IServicePackageService
     /// <summary>
     /// Khởi tạo ServicePackageService với CarWashDbContext được Inject qua Constructor.
     /// </summary>
-    /// <param name="dbContext">CarWashDbContext - NGUỒN: DI Container - DbContext kết nối CSDL.</param>
     public ServicePackageService(CarWashDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -24,8 +23,6 @@ public class ServicePackageService : IServicePackageService
     /// <summary>
     /// Tạo gói dịch vụ mới trong CSDL với is_active = true (US-05).
     /// </summary>
-    /// <param name="requestDto">CreatePackageRequestDto - NGUỒN: Controller truyền vào - Thông tin gói cần tạo.</param>
-    /// <returns>PackageResponseDto chứa thông tin gói vừa tạo.</returns>
     public async Task<PackageResponseDto> CreatePackageAsync(CreatePackageRequestDto requestDto)
     {
         var package = new ServicePackage
@@ -54,7 +51,6 @@ public class ServicePackageService : IServicePackageService
     /// <summary>
     /// Lấy toàn bộ danh sách gói dịch vụ trong CSDL không lọc theo is_active (US-06).
     /// </summary>
-    /// <returns>Danh sách PackageResponseDto.</returns>
     public async Task<List<PackageResponseDto>> GetAllPackagesAsync()
     {
         return await _dbContext.Packages
@@ -69,5 +65,54 @@ public class ServicePackageService : IServicePackageService
                 IsActive = p.IsActive
             })
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết gói dịch vụ theo ID. Trả về null nếu không tìm thấy.
+    /// </summary>
+    public async Task<PackageResponseDto?> GetPackageByIdAsync(int id)
+    {
+        var p = await _dbContext.Packages.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (p == null) return null;
+
+        return new PackageResponseDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Description = p.Description,
+            Price = p.Price,
+            RewardPoints = p.RewardPoints,
+            IsActive = p.IsActive
+        };
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin gói dịch vụ. Giữ nguyên trường IsActive và các đơn hàng Booking đã tạo trước đó (US-07).
+    /// </summary>
+    public async Task<PackageResponseDto?> UpdatePackageAsync(int id, UpdatePackageRequestDto requestDto)
+    {
+        var package = await _dbContext.Packages.FirstOrDefaultAsync(p => p.Id == id);
+        if (package == null)
+        {
+            return null; // AC2 — Gói không tồn tại -> Trả về null
+        }
+
+        // Cập nhật thông tin bản ghi packages (trường IsActive giữ nguyên)
+        package.Name = requestDto.Name.Trim();
+        package.Description = requestDto.Description?.Trim();
+        package.Price = requestDto.Price;
+        package.RewardPoints = requestDto.RewardPoints;
+
+        await _dbContext.SaveChangesAsync();
+
+        return new PackageResponseDto
+        {
+            Id = package.Id,
+            Name = package.Name,
+            Description = package.Description,
+            Price = package.Price,
+            RewardPoints = package.RewardPoints,
+            IsActive = package.IsActive
+        };
     }
 }

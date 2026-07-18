@@ -11,13 +11,20 @@ public interface IServicePackageService
     /// <summary>
     /// Tạo một gói dịch vụ mới vào CSDL với trạng thái is_active = true (US-05).
     /// </summary>
-    /// <param name="requestDto">CreatePackageRequestDto - DTO chứa thông tin tên, mô tả, giá và điểm thưởng.</param>
-    /// <returns>PackageResponseDto chứa thông tin gói vừa tạo.</returns>
     Task<PackageResponseDto> CreatePackageAsync(CreatePackageRequestDto requestDto);
 
     /// <summary>
     /// Lấy toàn bộ danh sách gói dịch vụ trong CSDL kể cả gói đang ẩn dành cho Admin (US-06).
     /// </summary>
-    /// <returns>Danh sách các PackageResponseDto.</returns>
     Task<List<PackageResponseDto>> GetAllPackagesAsync();
+
+    /// <summary>
+    /// Lấy thông tin chi tiết của 1 gói dịch vụ theo ID (Hỗ trợ US-07).
+    /// </summary>
+    Task<PackageResponseDto?> GetPackageByIdAsync(int id);
+
+    /// <summary>
+    /// Chỉnh sửa tên, mô tả, giá hoặc điểm thưởng của gói đang tồn tại theo ID (US-07).
+    /// </summary>
+    Task<PackageResponseDto?> UpdatePackageAsync(int id, UpdatePackageRequestDto requestDto);
 }
