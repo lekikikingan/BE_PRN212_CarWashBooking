@@ -14,10 +14,6 @@ public class ServicePackageController : ControllerBase
 {
     private readonly IServicePackageService _servicePackageService;
 
-    /// <summary>
-    /// Khởi tạo ServicePackageController với IServicePackageService được Inject qua Constructor.
-    /// </summary>
-    /// <param name="servicePackageService">IServicePackageService - NGUỒN: Inject qua DI Container.</param>
     public ServicePackageController(IServicePackageService servicePackageService)
     {
         _servicePackageService = servicePackageService;
@@ -27,17 +23,6 @@ public class ServicePackageController : ControllerBase
     /// Tạo một gói dịch vụ mới (Dành cho Admin - US-05).
     /// Endpoint: POST /api/service-packages
     /// </summary>
-    /// <param name="requestDto">
-    /// CreatePackageRequestDto - NGUỒN: FE truyền lên qua Request Body - Chứa Name, Description, Price, RewardPoints.
-    /// </param>
-    /// <returns>
-    /// ApiResponse&lt;PackageResponseDto&gt;. Data gồm: Id, Name, Description, Price, RewardPoints, IsActive.
-    /// Trả 200 OK nếu tạo thành công (AC1).
-    /// Trả 400 Bad Request nếu:
-    /// - Tên gói bị bỏ trống hoặc chỉ chứa khoảng trắng: "Package name is required" (AC4)
-    /// - Giá gói &lt;= 0: "Package price must be greater than 0" (AC2)
-    /// - Điểm thưởng &lt; 0: "Reward points must be a non-negative integer" (AC3)
-    /// </returns>
     [HttpPost]
     public async Task<IActionResult> CreatePackage([FromBody] CreatePackageRequestDto requestDto)
     {
@@ -68,11 +53,6 @@ public class ServicePackageController : ControllerBase
     /// Lấy toàn bộ danh sách gói dịch vụ kể cả gói đang ẩn cho Admin (US-06).
     /// Endpoint: GET /api/service-packages
     /// </summary>
-    /// <returns>
-    /// ApiResponse&lt;List&lt;PackageResponseDto&gt;&gt;. Data gồm mảng danh sách toàn bộ các gói dịch vụ.
-    /// - 200 OK: Trả về danh sách các gói dịch vụ (AC1).
-    /// - 200 OK (Nếu CSDL rỗng): Trả về mảng rỗng kèm message "No packages found" (AC2).
-    /// </returns>
     [HttpGet]
     public async Task<IActionResult> GetAllPackages()
     {
@@ -86,5 +66,59 @@ public class ServicePackageController : ControllerBase
 
         // AC1 — Hiển thị toàn bộ danh sách gói
         return Ok(ApiResponse<List<PackageResponseDto>>.Ok(list, $"Lấy thành công {list.Count} gói dịch vụ."));
+    }
+
+    /// <summary>
+    /// API Lấy chi tiết một gói dịch vụ theo ID.
+    /// Endpoint: GET /api/service-packages/{id}
+    /// </summary>
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetPackageById(int id)
+    {
+        var package = await _servicePackageService.GetPackageByIdAsync(id);
+
+        if (package == null)
+        {
+            return NotFound(ApiResponse<PackageResponseDto>.Fail(404, "Package not found"));
+        }
+
+        return Ok(ApiResponse<PackageResponseDto>.Ok(package, "Lấy chi tiết gói dịch vụ thành công."));
+    }
+
+    /// <summary>
+    /// API Chỉnh sửa gói dịch vụ theo ID (US-07).
+    /// Endpoint: PUT /api/service-packages/{id}
+    /// </summary>
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdatePackage(int id, [FromBody] UpdatePackageRequestDto requestDto)
+    {
+        // AC4 — Điểm thưởng không hợp lệ (< 0)
+        if (requestDto.RewardPoints < 0)
+        {
+            return BadRequest(ApiResponse<PackageResponseDto>.Fail(400, "Reward points must be a non-negative integer"));
+        }
+
+        // AC3 — Giá không hợp lệ (<= 0)
+        if (requestDto.Price <= 0)
+        {
+            return BadRequest(ApiResponse<PackageResponseDto>.Fail(400, "Package price must be greater than 0"));
+        }
+
+        // Validate tên gói rỗng
+        if (string.IsNullOrWhiteSpace(requestDto.Name))
+        {
+            return BadRequest(ApiResponse<PackageResponseDto>.Fail(400, "Package name is required"));
+        }
+
+        var result = await _servicePackageService.UpdatePackageAsync(id, requestDto);
+
+        // AC2 — Gói không tồn tại trong CSDL
+        if (result == null)
+        {
+            return NotFound(ApiResponse<PackageResponseDto>.Fail(404, "Package not found"));
+        }
+
+        // AC1 — Sửa thành công
+        return Ok(ApiResponse<PackageResponseDto>.Ok(result, "Cập nhật gói dịch vụ thành công."));
     }
 }
