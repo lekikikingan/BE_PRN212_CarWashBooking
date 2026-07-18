@@ -6,6 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// Cấu hình Swagger API Explorer
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<CarWashDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -33,6 +37,10 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    // Bật Swagger & Swagger UI ở môi trường Development
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
     await DbInitializer.SeedAsync(app.Services);
 }
 
