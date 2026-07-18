@@ -19,7 +19,7 @@ public class PaymentController : ControllerBase
     }
 
     /**
-     * // comment by Tài: Lấy tổng điểm thưởng hiện có của customer (MD-05-FE-05)
+     * // comment by Tài: Lấy tổng điểm thưởng hiện có của customer
      * @author Tài
      * @version 1.0
      */
@@ -67,7 +67,7 @@ public class PaymentController : ControllerBase
     }
 
     /**
-     * // comment by Tài: Thanh toán cho booking (US-14)
+     * // comment by Tài: Thanh toán cho booking
      * @author Tài
      * @version 1.0
      */
@@ -113,6 +113,16 @@ public class PaymentController : ControllerBase
                 success = false,
                 message = ex.Message,
                 errorCode = "CONFLICT"
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            // Trả về HTTP 400 Bad Request nếu điểm thưởng không hợp lệ (số âm, vượt quá điểm hiện có, vượt quá giá gói)
+            return BadRequest(new
+            {
+                success = false,
+                message = ex.Message,
+                errorCode = "BAD_REQUEST"
             });
         }
         catch (Exception)

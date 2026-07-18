@@ -53,13 +53,13 @@ public class PaymentService : IPaymentService
             throw new KeyNotFoundException("Không tìm thấy booking.");
         }
 
-        // 2. Kiểm tra chủ sở hữu booking (AC2 US-14)
+        // 2. Kiểm tra chủ sở hữu booking 
         if (booking.CustomerId != userId)
         {
             throw new UnauthorizedAccessException("You do not have permission to pay for this booking");
         }
 
-        // 3. Kiểm tra trạng thái booking (AC3 US-14)
+        // 3. Kiểm tra trạng thái booking 
         if (booking.Status != BookingStatus.PendingPayment)
         {
             throw new InvalidOperationException("This booking is not pending payment");
@@ -79,22 +79,43 @@ public class PaymentService : IPaymentService
             throw new KeyNotFoundException("Không tìm thấy thông tin khách hàng.");
         }
 
-        // 5. Thực hiện lưu transaction cập nhật trạng thái và điểm thưởng
+        // 5. Kiểm tra và tính toán điểm sử dụng 
+        int pointsUsed = request.PointsUsed ?? 0;
+
+        // Số điểm nhập không hợp lệ (số âm)
+        if (pointsUsed < 0)
+        {
+            throw new ArgumentException("Invalid number of points used");
+        }
+
+        // Số điểm nhập vượt quá điểm hiện có
+        if (pointsUsed > user.TotalPoints)
+        {
+            throw new ArgumentException("The number of points used exceeds your available points");
+        }
+
+        // Số điểm quy đổi vượt quá giá gói (1 điểm = 1000đ)
+        if (pointsUsed * 1000 > package.Price)
+        {
+            throw new ArgumentException("Points used cannot exceed the package price");
+        }
+
+        // Tính toán số tiền thực tế cần thanh toán sau khi giảm giá (1 điểm = 1000đ)
+        decimal amountPaid = package.Price - (pointsUsed * 1000);
+
+        // 6. Thực hiện lưu transaction cập nhật trạng thái và điểm thưởng
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
-            decimal amountPaid = package.Price;
-            int pointsUsed = 0;
-
-            // Cập nhật trạng thái booking
+            // Cập nhật trạng thái booking 
             booking.Status = BookingStatus.Paid;
             booking.PaidAt = DateTime.UtcNow;
             booking.AmountPaid = amountPaid;
             booking.PointsUsed = pointsUsed;
             booking.PointsEarned = package.RewardPoints;
 
-            // Cộng điểm thưởng tích lũy của gói dịch vụ vào tài khoản user
-            user.TotalPoints += package.RewardPoints;
+            // Trừ điểm đã dùng và cộng điểm tích lũy của gói dịch vụ vào tài khoản user
+            user.TotalPoints = user.TotalPoints - pointsUsed + package.RewardPoints;
 
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
