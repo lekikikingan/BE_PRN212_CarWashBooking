@@ -1,3 +1,5 @@
+using CarWashBooking.Models.DTOs;
+
 namespace CarWashBooking.Services;
 
 /// <summary>
@@ -8,4 +10,17 @@ namespace CarWashBooking.Services;
 /// </summary>
 public interface IPaymentService
 {
+    /**
+     * // comment by Tài: Lấy tổng điểm thưởng hiện tại của khách hàng.
+     * @author Tài
+     * @version 1.0
+     */
+    Task<RewardPointsResponse> GetRewardPointsAsync(int userId);
+
+    /**
+     * // comment by Tài: Thực hiện thanh toán cho booking, hỗ trợ áp dụng điểm thưởng giảm giá.
+     * @author Tài
+     * @version 1.0
+     */
+    Task<PaymentResponse> ProcessPaymentAsync(int userId, PayRequest request);
 }

@@ -8,6 +8,4 @@ public class CreateBookingRequest
 {
 }
 
-public class PayRequest
-{
-}
+
