@@ -14,4 +14,10 @@ public interface IServicePackageService
     /// <param name="requestDto">CreatePackageRequestDto - DTO chứa thông tin tên, mô tả, giá và điểm thưởng.</param>
     /// <returns>PackageResponseDto chứa thông tin gói vừa tạo.</returns>
     Task<PackageResponseDto> CreatePackageAsync(CreatePackageRequestDto requestDto);
+
+    /// <summary>
+    /// Lấy toàn bộ danh sách gói dịch vụ trong CSDL kể cả gói đang ẩn dành cho Admin (US-06).
+    /// </summary>
+    /// <returns>Danh sách các PackageResponseDto.</returns>
+    Task<List<PackageResponseDto>> GetAllPackagesAsync();
 }
