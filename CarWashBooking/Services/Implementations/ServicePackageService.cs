@@ -1,6 +1,7 @@
 using CarWashBooking.Data;
 using CarWashBooking.Models.DTOs;
 using CarWashBooking.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarWashBooking.Services;
 
@@ -48,5 +49,25 @@ public class ServicePackageService : IServicePackageService
             RewardPoints = package.RewardPoints,
             IsActive = package.IsActive
         };
+    }
+
+    /// <summary>
+    /// Lấy toàn bộ danh sách gói dịch vụ trong CSDL không lọc theo is_active (US-06).
+    /// </summary>
+    /// <returns>Danh sách PackageResponseDto.</returns>
+    public async Task<List<PackageResponseDto>> GetAllPackagesAsync()
+    {
+        return await _dbContext.Packages
+            .AsNoTracking()
+            .Select(p => new PackageResponseDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                RewardPoints = p.RewardPoints,
+                IsActive = p.IsActive
+            })
+            .ToListAsync();
     }
 }

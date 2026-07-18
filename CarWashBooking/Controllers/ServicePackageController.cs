@@ -63,4 +63,28 @@ public class ServicePackageController : ControllerBase
         var result = await _servicePackageService.CreatePackageAsync(requestDto);
         return Ok(ApiResponse<PackageResponseDto>.Ok(result, "Tạo gói dịch vụ thành công."));
     }
+
+    /// <summary>
+    /// Lấy toàn bộ danh sách gói dịch vụ kể cả gói đang ẩn cho Admin (US-06).
+    /// Endpoint: GET /api/service-packages
+    /// </summary>
+    /// <returns>
+    /// ApiResponse&lt;List&lt;PackageResponseDto&gt;&gt;. Data gồm mảng danh sách toàn bộ các gói dịch vụ.
+    /// - 200 OK: Trả về danh sách các gói dịch vụ (AC1).
+    /// - 200 OK (Nếu CSDL rỗng): Trả về mảng rỗng kèm message "No packages found" (AC2).
+    /// </returns>
+    [HttpGet]
+    public async Task<IActionResult> GetAllPackages()
+    {
+        var list = await _servicePackageService.GetAllPackagesAsync();
+
+        // AC2 — Không có gói nào trong CSDL
+        if (list.Count == 0)
+        {
+            return Ok(ApiResponse<List<PackageResponseDto>>.Ok(list, "No packages found"));
+        }
+
+        // AC1 — Hiển thị toàn bộ danh sách gói
+        return Ok(ApiResponse<List<PackageResponseDto>>.Ok(list, $"Lấy thành công {list.Count} gói dịch vụ."));
+    }
 }
