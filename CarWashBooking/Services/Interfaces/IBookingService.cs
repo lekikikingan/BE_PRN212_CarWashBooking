@@ -6,4 +6,10 @@ namespace CarWashBooking.Services;
 /// </summary>
 public interface IBookingService
 {
+    /**
+     * // comment by Tài: Hủy lịch đặt xe.
+     * @author Tài
+     * @version 1.0
+     */
+    Task CancelBookingAsync(int userId, int bookingId);
 }
