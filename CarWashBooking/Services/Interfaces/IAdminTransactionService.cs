@@ -16,4 +16,15 @@ public interface IAdminTransactionService
     /// <param name="filter">Điều kiện lọc theo trạng thái và/hoặc khoảng ngày. Có thể null.</param>
     /// <returns>Danh sách TransactionItemDto thỏa điều kiện, sắp xếp theo PaidAt giảm dần.</returns>
     Task<List<TransactionItemDto>> GetTransactionsAsync(TransactionFilterDto? filter = null);
+
+    /// <summary>
+    /// Xác nhận hoàn thành một booking đang ở trạng thái PAID (US-23 / BR-23).
+    /// </summary>
+    /// <param name="bookingId">Mã booking cần xác nhận hoàn thành.</param>
+    /// <returns>
+    /// CompleteBookingResultDto nếu cập nhật thành công (booking đang PAID → COMPLETED);
+    /// null nếu booking không tồn tại (Controller trả 404);
+    /// ném InvalidOperationException nếu booking không ở trạng thái PAID (Controller trả 409).
+    /// </returns>
+    Task<CompleteBookingResultDto?> CompleteBookingAsync(int bookingId);
 }
