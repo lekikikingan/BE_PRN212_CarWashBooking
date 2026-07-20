@@ -7,7 +7,7 @@ namespace CarWashBooking.Services;
 
 /// <summary>
 /// Lớp triển khai nghiệp vụ quản lý giao dịch cho Admin.
-/// US-21 (Transaction List), US-22 (Filter Transaction by Status/Date).
+/// US-21 (Transaction List), US-22 (Filter Transaction by Status/Date), US-23 (Mark Booking Completed).
 /// </summary>
 public class AdminTransactionService : IAdminTransactionService
 {
@@ -65,5 +65,35 @@ public class AdminTransactionService : IAdminTransactionService
                 PaidAt = b.PaidAt
             })
             .ToListAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<CompleteBookingResultDto?> CompleteBookingAsync(int bookingId)
+    {
+        var booking = await _dbContext.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
+
+        // Không tồn tại → Controller trả 404
+        if (booking == null)
+        {
+            return null;
+        }
+
+        // BR-23 EXCEPTION 1 — Chỉ cho phép hoàn thành booking đang ở trạng thái PAID
+        if (booking.Status != BookingStatus.Paid)
+        {
+            throw new InvalidOperationException("Chỉ có thể xác nhận hoàn thành cho booking đã thanh toán");
+        }
+
+        // BR-23 RULE 1 — Chuyển sang COMPLETED và ghi thời điểm hoàn thành
+        booking.Status = BookingStatus.Completed;
+        booking.CompletedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+
+        return new CompleteBookingResultDto
+        {
+            BookingId = booking.Id,
+            Status = booking.Status.ToString().ToUpperInvariant(),
+            CompletedAt = booking.CompletedAt
+        };
     }
 }
