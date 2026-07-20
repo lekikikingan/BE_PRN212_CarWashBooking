@@ -7,7 +7,7 @@ namespace CarWashBooking.Services;
 
 /// <summary>
 /// Lớp triển khai nghiệp vụ quản lý giao dịch cho Admin.
-/// US-21 (Transaction List).
+/// US-21 (Transaction List), US-22 (Filter Transaction by Status/Date).
 /// </summary>
 public class AdminTransactionService : IAdminTransactionService
 {
@@ -23,12 +23,35 @@ public class AdminTransactionService : IAdminTransactionService
     }
 
     /// <inheritdoc />
-    public async Task<List<TransactionItemDto>> GetTransactionsAsync()
+    public async Task<List<TransactionItemDto>> GetTransactionsAsync(TransactionFilterDto? filter = null)
     {
-        // BR-21 — Chỉ lấy booking đã thanh toán trở lên (PAID, COMPLETED), sắp xếp PaidAt giảm dần
-        return await _dbContext.Bookings
+        // BR-21 — Chỉ lấy booking đã thanh toán trở lên (PAID, COMPLETED)
+        var query = _dbContext.Bookings
             .AsNoTracking()
-            .Where(b => b.Status == BookingStatus.Paid || b.Status == BookingStatus.Completed)
+            .Where(b => b.Status == BookingStatus.Paid || b.Status == BookingStatus.Completed);
+
+        // BR-22 — Áp dụng bộ lọc (AND) nếu có
+        if (filter != null)
+        {
+            // RULE 1 — Lọc theo trạng thái
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(b => b.Status == filter.Status.Value);
+            }
+
+            // RULE 2 — Lọc theo khoảng ngày hẹn
+            if (filter.FromDate.HasValue)
+            {
+                query = query.Where(b => b.AppointmentDate >= filter.FromDate.Value);
+            }
+
+            if (filter.ToDate.HasValue)
+            {
+                query = query.Where(b => b.AppointmentDate <= filter.ToDate.Value);
+            }
+        }
+
+        return await query
             .OrderByDescending(b => b.PaidAt)
             .Select(b => new TransactionItemDto
             {

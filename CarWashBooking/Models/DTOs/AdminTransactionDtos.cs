@@ -1,7 +1,9 @@
+using CarWashBooking.Models.Entities;
+
 namespace CarWashBooking.Models.DTOs;
 
 /// <summary>
-/// DTO trả về mỗi dòng giao dịch trong danh sách của Admin (US-21 / BR-21).
+/// DTO trả về mỗi dòng giao dịch trong danh sách của Admin (US-21 / BR-21, US-22 / BR-22).
 /// Chỉ gồm booking có trạng thái PAID hoặc COMPLETED.
 /// </summary>
 public class TransactionItemDto
@@ -29,4 +31,23 @@ public class TransactionItemDto
 
     /// <summary>Thời điểm thanh toán.</summary>
     public DateTime? PaidAt { get; set; }
+}
+
+/// <summary>
+/// DTO nhận điều kiện lọc danh sách giao dịch từ Admin (US-22 / BR-22).
+/// Tất cả tham số đều tùy chọn; kết hợp bằng logic AND.
+/// </summary>
+public class TransactionFilterDto
+{
+    /// <summary>
+    /// Lọc theo trạng thái booking. Giá trị hợp lệ: PAID, COMPLETED, CANCELLED.
+    /// Null = không lọc theo trạng thái.
+    /// </summary>
+    public BookingStatus? Status { get; set; }
+
+    /// <summary>Lọc theo ngày hẹn từ (bao gồm). Null = không giới hạn cận dưới.</summary>
+    public DateOnly? FromDate { get; set; }
+
+    /// <summary>Lọc theo ngày hẹn đến (bao gồm). Null = không giới hạn cận trên.</summary>
+    public DateOnly? ToDate { get; set; }
 }
