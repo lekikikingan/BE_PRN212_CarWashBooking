@@ -1,3 +1,5 @@
+using CarWashBooking.Models.DTOs;
+
 namespace CarWashBooking.Services;
 
 /// <summary>
@@ -7,4 +9,9 @@ namespace CarWashBooking.Services;
 /// </summary>
 public interface IAdminTransactionService
 {
+    /// <summary>
+    /// Lấy danh sách giao dịch (booking PAID/COMPLETED), sắp xếp theo PaidAt giảm dần (US-21 / BR-21).
+    /// </summary>
+    /// <returns>Danh sách TransactionItemDto. Trả về danh sách rỗng nếu không có giao dịch nào.</returns>
+    Task<List<TransactionItemDto>> GetTransactionsAsync();
 }
