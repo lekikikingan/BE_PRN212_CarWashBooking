@@ -12,13 +12,10 @@ namespace CarWashBooking.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    // Giả lập database bằng List tĩnh trong bộ nhớ
+    
     private static readonly List<User> Users = new List<User>();
     private static readonly List<Session> Sessions = new List<Session>();
 
-    // ==========================================
-    // MD-01 / BR-01 — ĐĂNG KÝ TÀI KHOẢN
-    // ==========================================
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserDto dto)
     {
@@ -58,9 +55,7 @@ public class AuthController : ControllerBase
         return StatusCode(201, new { message = "Đăng ký thành công!" });
     }
 
-    // ==========================================
-    // MD-01 / BR-02 — ĐĂNG NHẬP (TẠO COOKIE)
-    // ==========================================
+    
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDto dto)
     {
@@ -95,9 +90,7 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Đăng nhập thành công" });
     }
 
-    // ==========================================
-    // MD-01 / BR-03 — ĐĂNG XUẤT (HỦY COOKIE)
-    // ==========================================
+   
     [HttpPost("logout")]
     public IActionResult Logout()
     {
@@ -121,9 +114,7 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Đăng xuất thành công" });
     }
 
-    // ==========================================
-    // MD-02 / BR-04 — CẬP NHẬT THÔNG TIN CÁ NHÂN
-    // ==========================================
+  
     [HttpPut("profile")]
     public IActionResult UpdateProfile([FromBody] UserDto dto)
     {
